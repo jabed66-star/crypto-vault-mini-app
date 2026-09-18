@@ -7,7 +7,9 @@
 <title>Crypto Vault</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+setTimeout(function(){
+  document.getElementById("cvLoad").classList.add("off");
+},4000);
 <style>
 /* ===== CRYPTO VAULT LOADING ===== */
 #cvLoad{position:fixed;inset:0;background:#07090d;z-index:99999;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:.55s}
