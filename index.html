@@ -2143,7 +2143,7 @@ function renderTasks(){
 }
 
 
-function claimTask(taskId){
+async function claimTask(taskId){
 
   if(completedTasks.includes(taskId)){
     return;
@@ -2158,6 +2158,72 @@ function claimTask(taskId){
     return;
   }
 
+  // Only channel tasks use server verification
+  if(task.type === "channel"){
+
+    showToast("Verifying...");
+
+    const channelTaskMap = {
+      101: "channel_1",
+      102: "channel_2",
+      103: "channel_3"
+    };
+
+    const backendTaskId =
+      channelTaskMap[taskId];
+
+    try{
+
+      const response = await fetch(
+        "https://lzaxlieyabkecdwpmmpa.supabase.co/functions/v1/verify-channel",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            initData: tg.initData,
+            taskId: backendTaskId
+          })
+        }
+      );
+
+      const result = await response.json();
+
+      if(!result.success){
+
+        showToast(
+          result.message || "Verification failed"
+        );
+
+        return;
+      }
+
+      // Server confirmed membership and reward
+      completedTasks.push(taskId);
+
+      saveTasks();
+      renderTasks();
+
+      showToast(
+        "+" + result.reward + " POINTS"
+      );
+
+      return;
+
+    }catch(error){
+
+      console.error(error);
+
+      showToast(
+        "Verification failed. Try again."
+      );
+
+      return;
+    }
+  }
+
+  // Existing demo tasks
   balance += task.reward;
   earned += task.reward;
 
@@ -2172,7 +2238,6 @@ function claimTask(taskId){
   showToast(
     "+" + task.reward + " POINTS"
   );
-
 }
 
 
